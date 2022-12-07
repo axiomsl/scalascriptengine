@@ -36,11 +36,11 @@ case class ClassRegistry(parentClassLoader: ClassLoader, dirs: Set[File])
 	def withTypeOf[T](implicit ct: ClassTag[T]) = allClasses.filter(ct.runtimeClass.isAssignableFrom _)
 
 	// find all class files
-	private def find(dirs: List[File]): List[File] = dirs.map {
+	private def find(dirs: List[File]): List[File] = dirs.flatMap {
 		dir =>
 			if (!dir.isDirectory) throw new IllegalArgumentException(s"not a directory: $dir")
 			val files = dir.listFiles.toList
 			val subDirs = find(files.filter(_.isDirectory))
 			files.filter(_.getName.endsWith(".class")) ::: subDirs
-	}.flatten
+	}
 }

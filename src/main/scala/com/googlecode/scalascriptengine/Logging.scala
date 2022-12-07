@@ -13,13 +13,13 @@ protected trait Logging
 {
 	private val logger: Logger = LoggerFactory.getLogger(getClass)
 
-	protected def debug(msg: => String) = if (logger.isDebugEnabled) logger.debug(msg)
+	protected def debug(msg: => String): Unit = if (logger.isDebugEnabled) logger.debug(msg)
 
-	protected def info(msg: => String) = if (logger.isInfoEnabled) logger.info(msg)
+	protected def info(msg: => String): Unit = if (logger.isInfoEnabled) logger.info(msg)
 
-	protected def warn(msg: String) = logger.warn(msg)
+	protected def warn(msg: => String): Unit = if (logger.isWarnEnabled()) logger.warn(msg)
 
-	protected def error(msg: String) = logger.error(msg)
+	protected def error(msg: => String): Unit = if (logger.isErrorEnabled) logger.error(msg)
 
-	protected def error(msg: String, e: Throwable) = logger.error(msg, e)
+	protected def error(msg: => String, e: Throwable): Unit = if (logger.isErrorEnabled) logger.error(msg, e)
 }

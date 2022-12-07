@@ -356,7 +356,7 @@ class CompletionExecutor[V](protected val executorService: ExecutorService) exte
 	  */
 	def poll(timeout: Long, unit: TimeUnit): Option[Future[V]] = {
 		val t = completionService.poll(timeout, unit)
-		if (t == null) None else Some(t)
+		Option(t)
 	}
 
 	/**
