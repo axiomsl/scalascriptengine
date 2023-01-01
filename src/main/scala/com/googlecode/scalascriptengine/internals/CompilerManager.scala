@@ -65,7 +65,8 @@ class CompilerManager(sourcePaths: List[SourcePath], classPaths: Set[File], sse:
 
   def compile(allFiles: List[String]): Unit = {
 
-    def doCompile(sp: SourcePath, cp: Set[File]): Unit = {
+    def doCompile(sp: SourcePath, cp: Set[File]): String
+    = {
       val (g, run, reporter) = runMap(sp)
 
       val rootPaths = sp.sources.map(_.getAbsolutePath)
@@ -77,23 +78,28 @@ class CompilerManager(sourcePaths: List[SourcePath], classPaths: Set[File], sse:
 
       val errors = reporter.results
       if (errors.nonEmpty) {
-        throw new CompilationError(s"${errors.size} error(s) occurred:\n" +
-          s"${errors.map(t => t._1.source.file.canonicalPath + "\n\t" + t._2).mkString("\n")}")
+        s"${errors.size} error(s) occurred:\n" +
+          s"${errors.map(t => t._1.source.file.canonicalPath + "\n\t" + t._2).mkString("\n")}\n"
+      } else {
+        ""
       }
     }
 
     @tailrec
-    def all(todo: List[SourcePath], done: List[SourcePath]): Unit = {
+    def all(todo: List[SourcePath], done: List[SourcePath], errorMessage: String = ""): String = {
       todo match {
-        case Nil =>
+        case Nil => errorMessage
         // nop
         case h :: t =>
-          doCompile(h, classPaths ++ done.map(_.targetDir))
-          all(t, h :: done)
+          val currentErrorMessage = doCompile(h, classPaths ++ done.map(_.targetDir))
+          all(t, h :: done, errorMessage + " " + currentErrorMessage)
       }
     }
 
-    all(sourcePaths, Nil)
+    all(sourcePaths, Nil).trim match {
+      case "" =>
+      case m  => throw new CompilationError(m)
+    }
   }
 
 }
