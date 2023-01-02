@@ -3,6 +3,7 @@ package com.googlecode.scalascriptengine.internals
 import java.io.File
 import com.googlecode.scalascriptengine.{Logging, ScalaScriptEngine, SourcePath}
 
+import java.nio.file.{Files, Paths}
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.reflect.internal.util.Position
@@ -78,6 +79,10 @@ class CompilerManager(sourcePaths: List[SourcePath], classPaths: Set[File], sse:
 
       val errors = reporter.results
       if (errors.nonEmpty) {
+        errors.foreach {
+          case (p, _) =>
+            Files.delete(Paths.get(p.source.file.canonicalPath))
+        }
         s"${errors.size} error(s) occurred:\n" +
           s"${errors.map(t => t._1.source.file.canonicalPath + "\n\t" + t._2).mkString("\n")}\n"
       } else {
